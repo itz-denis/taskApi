@@ -5,11 +5,12 @@ const taskController = require("../controller/taskController");
 // יצירת משימה חדשה
 router.post("/", taskController.createTask);
 
-// קבלת כל המשימות של משתמש מסוים
-router.get("/:localUserId", taskController.getUserTasks);
+// קבלת משימות לפי משתמש
+router.get("/user/:localUserId", taskController.getUserTasks);
 
-// קבלת משימה לפי ID
-router.get("/:id", taskController.getTaskById);
+// קבלת משימה לפי מזהה
+router.get("/id/:id", taskController.getTaskById);
+
 
 // עדכון משימה לפי ID
 router.put("/:id", taskController.updateTask);

@@ -2,20 +2,38 @@ const Task = require("../model/taskModel");
 
 // יצירת משימה חדשה
 exports.createTask = async (req, res) => {
+   
+
+    const { description ,dueDate , localUserId ,priority , status , title} = req.body ;
+    
+    console.log(localUserId);
+    
     try {
-        const task = new Task(req.body);
+        const task = new Task({
+            description ,dueDate , localUserId:parseInt(localUserId) ,priority , status , title
+        });
+        
+        
         await task.save();
         res.status(201).json(task);
     } catch (error) {
+        console.error("Save error:", error);  // הדפסה ברורה למסוף
         res.status(400).json({ error: error.message });
     }
+
 };
 
 // קבלת כל המשימות של משתמש מסוים
 exports.getUserTasks = async (req, res) => {
+   
+    
     try {
         const { localUserId } = req.params;
-        const tasks = await Task.find({ localUserId });
+        console.log(localUserId);
+        
+        const tasks = await Task.find({ localUserId:parseInt(localUserId) });
+        console.log(tasks);
+        
         res.json(tasks);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -34,15 +52,24 @@ exports.getTaskById = async (req, res) => {
 };
 
 // עדכון משימה לפי ID
+// הגנה על עדכון חלקי בלבד:
 exports.updateTask = async (req, res) => {
     try {
-        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const allowedFields = ['status', 'priority'];
+        const updates = {};
+        for (let field of allowedFields) {
+            if (req.body[field]) updates[field] = req.body[field];
+        }
+
+        const task = await Task.findByIdAndUpdate(req.params.id, updates, { new: true });
         if (!task) return res.status(404).json({ message: "Task not found" });
         res.json(task);
     } catch (error) {
+        console.error("update error:", error);
         res.status(400).json({ error: error.message });
     }
 };
+
 
 // מחיקת משימה לפי ID
 exports.deleteTask = async (req, res) => {
